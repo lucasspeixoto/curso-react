@@ -654,3 +654,91 @@ Aqui, entre PassoForm e Contador, temos os dois tipos de comunicação, direta e
 * Como boa prática de desenvolvimento, podemos criar uma pasta de views e outra de components, em views iremos colocar componentes que representa telas inteiras e em components, componentes que representam partes de uma tela.
 
 * O componente Link de navegação gera uma tag a
+
+* Dentro de um conteudo dinâmico, ou seja, que vai exibir componentes de navegação, se colocarmos o componente Home logo de inicio, todos os outros vão navegar para home, pois todas as rotas inicia, em '/...'
+Ex:
+import React from 'react'
+import { Switch, Route } from 'react-router-dom'
+
+import About from '../../views/examples/About'
+import Home from '../../views/examples/Home'
+import Param from '../../views/examples/Param'
+
+import './Content.css'
+
+export default _ => {
+
+    return (
+        <main className="Content">
+            <Switch>
+		<Route path="/">
+                    <Home></Home>
+                </Route>
+                <Route path="/about">
+                    <About></About>
+                </Route>
+                <Route path="/param/:id">
+                    <Param></Param>
+                </Route>
+            </Switch>
+        </main>
+    )
+}
+
+Para evitar isso, podemos passar exact path = '/', que nesse caso, só navega para Home se a url for exata
+A vantagem de não ter o exact e colocar o Home por ultima nas rotas, é que uma rota inexistente, vai direcionar para home.
+As rotas existentes não, pois, ele encontra o caminho antes.
+
+Podemos tambem criar um componente para erro de página não encontrada, basta listar a rota no final, em Content.jsx
+
+Ex:
+
+ -> Em NotFound.jsx:
+import React from 'react'
+
+export default _ => {
+
+    return (
+        <div className="Not Found">
+            <h1>404</h1>
+            <h2>Página Não encontrada</h2>
+        </div>
+    )
+}
+
+ -> Em Content.jsx:
+import React from 'react'
+import { Switch, Route } from 'react-router-dom'
+
+import About from '../../views/examples/About'
+import Home from '../../views/examples/Home'
+import Param from '../../views/examples/Param'
+import NotFound from '../../views/examples/NotFound'
+
+import './Content.css'
+
+export default _ => {
+
+    return (
+        <main className="Content">
+            <Switch>
+                <Route path="/about">
+                    <About></About>
+                </Route>
+                <Route path="/param/:id">
+                    <Param></Param>
+                </Route>
+                <Route exact path="/">
+                    <Home></Home>
+                </Route>
+                <Route path="*">
+                    <NotFound></NotFound>
+                </Route>
+            </Switch>
+        </main>
+    )
+}
+
+
+
+
