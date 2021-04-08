@@ -1,0 +1,656 @@
+React
+
+* Single page application: O React é um framework de uma única página (public/index.html), que vai ter uma div com id 'root', onde será renderizado todos os nossos elementos.
+
+* React utiliza a sintaxe jsx, que permite escrever elementos, da mesma forma que escrevemos em códigos html, ou seja, por tras, terá um interpretador que vai transformar essa sintaxe em JavaScrip
+
+Ex:
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import './index.css';
+  import App from './main/App';
+  import reportWebVitals from './reportWebVitals';
+
+  ReactDOM.render(
+    <React.StrictMode> {/* Sintaxe jsx */}
+      <App />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+
+  reportWebVitals();
+
+* Uma das ideias por tras dos componentes, é a reutilização, podemos reutilizar um componente quantas vezes for necessário
+
+Ex: 
+ import React from 'react'
+ import ReactDOM from 'react-dom'
+ import './index.css'
+
+ import Primeiro from './components/basics/Primeiro'
+ import ComParametro from './components/basics/ComParametro'
+
+ ReactDOM.render(
+     <div>
+         <Primeiro></Primeiro>
+         <ComParametro titulo="Situação do aluno"
+                      nome="Liana" nota={9.8} />
+         <ComParametro titulo="Situação do aluno"
+                      nome="Lucas" nota={9.1} />
+     </div>,
+     document.getElementById('root')   
+ )
+
+* As propriedades passadas como parâmetro de um componente são imutáveis, todas são somente leitura. Caso seja necessário renderizar um parâmetro que 'pode' variar, é necessário criar uma variável auxiliar.
+
+* Um componente não pode retornar isoladamente dois ou mais componentes, esses componentes precisam ser envolvidos por uma div, ou, com algumas elementos especializados do React, como React.Fragment ou React.StrictMode.
+
+* O StrictMode do React é uma espécie de componente auxiliar que o ajudará a escrever melhores componentes, você pode agrupar um conjunto de componentes com <StrictMode /> e basicamente:
+
+Verificam se os componentes internos estão seguindo algumas das práticas recomendadas e avise se não estiverem no console.
+Verificam se os métodos obsoletos não estão sendo usados ​​e, se forem usados, o modo estrito o avisará no console.
+ Ajudam a prevenir alguns efeitos colaterais, identificando riscos potenciais.
+Como diz a documentação, o modo estrito é orientado para o desenvolvimento, então você não precisa se preocupar com o impacto na construção de sua produção.
+
+Achei especialmente útil implementar o modo estrito quando estou trabalhando em novas bases de código e quero ver que tipo de código / componentes estou enfrentando. Além disso, se você estiver no modo de caça a bugs, às vezes é uma boa ideia envolver com <StrictMode /> os componentes / blocos de código que você acha que podem ser a fonte do problema.
+
+Então sim, você está no caminho correto para entender o modo estrito, continue, acho que é uma daquelas coisas que você entende melhor quando joga com eles, então vá em frente e divirta-se.
+
+* Uma forma de passar um parâmetro que não é utilizado, é através do underline (_)
+
+Ex:
+export default _ => {
+
+    return (
+    <React.StrictMode>
+        <Primeiro></Primeiro>
+        <ComParametro titulo="Situação do aluno"
+                      nome="Liana" nota={9.8} />
+        <ComParametro titulo="Situação do aluno"
+                      nome="Lucas" nota={6.1} />
+    </React.StrictMode>
+    )
+}
+
+* Para passar um componente dentro de outro, e exibir todas as propriedades do elemento filho, precisamos utilizar o 'props.children'
+
+Ex: 
+ -> App.jsx:
+	import React from 'react'
+	import Primeiro from './components/basics/Primeiro'
+	import ComParametro from './components/basics/ComParametro'
+	import Aleatorio from './components/basics/Aleatorio'
+	import Card from './components/layout/Card'
+
+	export default _ => {
+
+    	return (
+        	<React.StrictMode>
+            	<Card titulo = "Desafio Aleatório">
+                	<Aleatorio className="Card" min={1} max={50}/>
+            	</Card>
+        	</React.StrictMode>
+    		)
+			   }
+
+ -> Aleatorio.jsx:
+	import React from 'react'
+	export default props => {
+    	const {min, max} = props
+    	const aleatorio = Math.floor(Math.random() * (props.max - props.min) + props.min)
+    	return (
+        	<div>
+            	<h2>Valor Aleatório</h2>
+            	<p>Mínimo: <strong> { min }</strong></p>
+            	<p>Máximo: <strong> { max }</strong></p>
+            	<p>Aleatório: <strong> { aleatorio }</strong></p>
+        	</div>
+    		)
+				}
+
+ -> Card.jsx:
+	import React from 'react'
+	import './Card.css'
+
+	export default props => {
+    	return (
+        	<div className="Card">
+           		<div className="Title">{props.titulo}</div>
+            		<div className="Content">
+                		{props.children}
+            		</div>
+       		 </div>
+    	)
+	}
+
+* Passando propriedades de Pai (Familia) para filho (FamiliaMembro)
+  -> FamiliaMembro.jsx:
+
+	import React from 'react'
+	export default props => {
+    	return <span>{props.nome} <strong>{props.sobrenome}</strong></span> 
+	}
+
+  -> Familia.jsx:
+	import React from 'react'
+	import FamiliaMembro from './FamiliaMembro'
+
+	export default props => {
+    	return (
+        <div>
+            	<p><FamiliaMembro nome="Liana" sobrenome={props.sobrenome} /></p>
+            	<p><FamiliaMembro nome="Cecilia" {...props} /></p>
+            	<p><FamiliaMembro nome="Cesar" sobrenome="Peixoto Fernandes" /></p>
+        </div>
+    )
+}
+
+ -> App.jsx:
+
+import React from 'react'
+import Primeiro from './components/basics/Primeiro'
+import ComParametro from './components/basics/ComParametro'
+import Aleatorio from './components/basics/Aleatorio'
+import Card from './components/layout/Card'
+import Familia from './components/basics/Familia'
+import './App.css'
+ 
+export default _ => {
+
+    return (
+        <div className="App">
+            <h1>Fundamentos React</h1>
+            <div className="Cards">
+                <Card titulo="#04 - Componentes com Filhos" color="#5B2C6F ">
+                    <Familia sobrenome="Peixoto Fernandes"/> {/* Aqui, passamos para Familia, o sobrenome, que é passado ao FamiliaMembro através do Familia.jsx */}
+                </Card>
+
+                <Card titulo="#03 - Desafio Aleatório" color="#080">
+                    <Aleatorio className="Card" min={1} max={50} />
+                </Card>
+
+                <Card titulo="#02 - ComParametro" color="#008">
+                    <ComParametro
+                        titulo="Situação do Aluno"
+                        nome="Liana Fernandes"
+                        nota={9.8} />
+                </Card>
+
+                <Card titulo="#01 - Primeiro Componente" color="#fcad03">
+                    <Primeiro />
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+* No exemplo anterior, conseguimos passar as propriedades do Pai (Familia) para o filho (FamiliaMembro), pois, estavamos definindo os membros dentro de Familia.jsx, ou seja, tinhamos acessos as propriedades dos filhos, e só foi necessário passar o sobrenome com sobrenome = props.sobrenome.
+Se passar os filhos, dentro de Familia, em App.jsx, precisamos sinalizar as propriedades dos pais em Familia.jsx:
+
+ -> Em Familia.jsx:
+	import React, { cloneElement } from 'react'
+
+	export default props => {
+    	return (
+        	<div>
+            	{React.Children.map(props.children, (child) => {
+                	return cloneElement(child, props)
+            	})}
+        	</div>
+    	)
+	}
+Com React.Children.map, percorremos toda a lista de filhos (props.children), e para cada filho, retornamos um elemento clonado com as propriedades dos filhos e tambem dos pais.
+
+ -> Em App.jsx:
+import React from 'react'
+import Primeiro from './components/basics/Primeiro'
+import ComParametro from './components/basics/ComParametro'
+import Aleatorio from './components/basics/Aleatorio'
+import Card from './components/layout/Card'
+import Familia from './components/basics/Familia'
+import FamiliaMembro from './components/basics/FamiliaMembro'
+import './App.css'
+
+export default _ => {
+
+    return (
+        <div className="App">
+            <h1>Fundamentos React</h1>
+            <div className="Cards">
+                <Card titulo="#04 - Componentes com Filhos" color="#5B2C6F ">
+                    <Familia sobrenome="Peixoto Fernandes">
+                        <FamiliaMembro nome="Liana" />
+                        <FamiliaMembro nome="Cecilia" />
+                        <FamiliaMembro nome="Cesar" />
+                    </Familia>
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+
+* Toda vez que trabalhamos com arrays em React, precisamos usar chaves(keys), para facilitar o React no momento de identificar alterações em elementos dos arrays. Os elementos serão renderizados normalmente sem as chaves, porem, pode ocorrer problemas para lidar com alterações.
+
+Ex:
+
+ -> Em alunos.js:
+export default [
+    {id: 1, nome: "Ana", nota: 6.2},
+    {id: 2, nome: "Bia", nota: 8.7},
+    {id: 3, nome: "Carlos", nota: 6.8},
+    {id: 4, nome: "Pedro", nota: 7.7},
+    {id: 5, nome: "Alice", nota: 7.1},
+    {id: 6, nome: "Oliver", nota: 5.8},
+    {id: 7, nome: "Olinda", nota: 6.2},
+    {id: 8, nome: "Cecilia", nota: 8.6},
+    {id: 9, nome: "Cesar", nota: 9.2},
+]
+
+ -> Em ListaAlunos.jsx:
+import React from 'react'
+import alunos from '../../data/alunos'
+export default _ => {
+
+    const Alunos = alunos.map(aluno => {
+        return (
+        <li key={aluno.id}>
+            {aluno.id}- {aluno.nome} - {aluno.nota}
+        </li>
+        )
+    })
+    return (
+        <div>
+            <ul>
+                {Alunos}
+            </ul>
+        </div>
+    )
+}
+
+* A Renderização condicional é possíve através de operadores ternários ou de componentes If's Else's.
+
+Ex:
+
+ -> Em If.js:
+export default props => {
+    
+    const elseChild = props.children.filter(child => {
+        return child.type && child.type.name === 'Else'
+    })[0]
+
+    const ifChildren = props.children.filter(child => {
+        return child !== elseChild
+    })
+
+    if(props.test) {
+        return ifChildren
+    } else if(elseChild) {
+        return elseChild
+    } else {
+        return false
+    }
+}
+
+export const Else = props => props.children
+
+ -> Em UsuarioInfo.jsx:
+import React from 'react'
+import If, {Else} from './If'
+
+export default props => {
+    const usuario = props.usuario || {}
+    return (
+        
+        <div>
+            {/* 
+	    Caso tenha o parâmetro nome 
+            <If test={usuario && usuario.nome}>
+            Seja bem vindo(a) <strong>{usuario.nome}!</strong>
+            </If>
+            
+            <If test={!usuario || !usuario.nome}>
+            Seja bem vindo(a) <strong>Pessoa!</strong>
+            </If>
+	    */}
+
+            <If test={usuario && usuario.nome}>
+                Seja bem vindo(a) <strong>{usuario.nome}!</strong>
+                <Else>
+                    Seja bem vindo(a) <strong>Estranho!</strong>
+                </Else>
+            </If>
+        </div>
+    )
+}
+
+ -> Em ParOuImpar.jsx:
+import React from 'react'
+
+export default props => {
+    const isPar = props.numero % 2 === 0
+    return (
+        <div>
+            { isPar ?
+                <span>Par</span> :
+                <span>Ímpar</span>
+            }
+        </div>
+    )
+}
+
+ -> Em App.jsx:
+export default _ => {
+    return (
+        <div className="App">
+            <h1>Fundamentos React</h1>
+            <div className="Cards">
+                <Card titulo="#07 - Renderização Condicional" color="#1C2833">
+                    <ParOuImpar numero = {22}/>
+                    <UsuarioInfo usuario={{nome: 'Liana'}} />
+                    <UsuarioInfo usuario={{nome: 'Lucas'}} />
+                    <UsuarioInfo usuario={{email: 'fulano@gmail.com'}} /> {/*Não possue nome, cai no 'Else'*/}
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+* A comunicação de um componente pai para um componente filho é realizada através de props, uma comunicação direta.
+
+Ex: 
+ -> Em DiretaFilho.jsx:
+export default props => {
+    return (
+        <div>
+            <span>{props.nome} - </span>
+            <span>{props.idade} - </span>
+            <span>{props.nerd ? 'Verdadeiro' : 'Falso'}</span>
+        </div>
+    )
+}
+
+ -> Em DiretaPai.jsx:
+import React from 'react'
+import DiretaFilho from './DiretaFilho'
+export default props => {
+    return (
+        <div>
+            <DiretaFilho nome="Cecília" idade={4} nerd={true}></DiretaFilho>
+            <DiretaFilho nome="César" idade={3} nerd={false}></DiretaFilho>
+            <DiretaFilho nome="Charlote" idade={1} nerd={false}></DiretaFilho>
+        </div>
+    )
+}
+
+ -> Em App.jsx:
+
+import React from 'react'
+import Card from './components/layout/Card'
+import DiretaPai from './components/comunicacao/DiretaPai'
+
+import './App.css'
+
+export default _ => {
+
+    return (
+        <div className="App">
+            <h1>Fundamentos React</h1>
+            <div className="Cards">
+                <Card titulo="#08 - Tipos de Comunicação" color="#59323C">
+                    <DiretaPai></DiretaPai>
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+* A comunicação de um componente filho para um componente pai, ocorre de forma indireta, e pode ser programada com uma função para passagem dos parâmetros.
+O pai que tem uma comunicação direta com o filho, via props, passa uma função, e essa função, é uma função callback, que será chamada em algum momento, ou seja, quando acontecer algum evento no filho, a função foi chamada e passou as propriedades do componente filho para o componente pai.
+
+Ex:
+
+ -> Em IndiretaPai.jsx:
+import React, { Fragment } from 'react'
+import IndiretaFilho from './IndiretaFilho'
+export default props => {
+
+    // nome idade nerd
+    function fornecerInformacoes(nome, idade, nerd) {
+        console.log(nome, idade, nerd)
+    }
+    return (
+        <Fragment>
+            <div>Pai</div>
+            <IndiretaFilho quandoClicar={fornecerInformacoes}></IndiretaFilho>
+        </Fragment>
+    )
+}
+
+ -> Em IndiretaFilho.jsx:
+import React, {Fragment} from 'react'
+export default props => {
+    return (
+        <Fragment>
+            <div>Filho</div>
+            <button onClick={
+                function (event) {
+                    props.quandoClicar('Lucas', 29, true)
+                }
+            }>
+                Fornecer Informações
+            </button>
+        </Fragment>
+
+    )
+}
+
+* Para passar esses valores de parâmetros retornados pela função, precisamos inclui-los no componente pai, ou sejam definir variaves para esses parâmetros e atribuilas dentro da função callback que é chamada no componente filho. Além disso, será necessário trabalhar com o estado do componente, e passar essas alterações de propriedades do pai, que passam a ser as do filho.
+Para isso, podemos usar o Hooks 'useState', que é uma função que retorna um array de duas posições, a primeira é o valor, e a segunda uma função responsável por alterar o valor
+
+const [nome, setNome] = useState("?")
+nome, vai receber o valor desse nome, e setNome, vai receber a função responsável por alterar o nome.
+
+Ex: 
+ -> Em IndiretaFilho.jsx:
+
+import React, {Fragment} from 'react'
+export default props => {
+
+    const gerarIdade = () => Math.floor(Math.random() * (40) + 20)
+    //const gerarNerd = () => parseInt((Math.random() * (1) + 0).toFixed(0))
+    const gerarNerd = () => Math.random() > 0.5
+    return (
+        <Fragment>
+            <div>Filho</div>
+            <button onClick={
+                function (event) {
+                    props.quandoClicar('Lucas', gerarIdade(), gerarNerd())
+                }
+            }>
+                Fornecer Informações
+            </button>
+        </Fragment>
+
+    )
+}
+ -> Em IndiretaPai.jsx:
+import React, { Fragment, useState } from 'react'
+import IndiretaFilho from './IndiretaFilho'
+export default props => {
+
+    const [nome, setNome] = useState("?") 
+    const [idade, setIdade] = useState(0)
+    const [nerd, setNerd] = useState(false)
+
+    // nome idade nerd
+    function fornecerInformacoes(nome, idade, nerd) {
+        setNome(nome)
+        setIdade(idade)
+        setNerd(nerd)
+    }
+    return (
+        <Fragment>
+            <div>
+                <span>{nome} </span>
+                <span>{idade} </span>
+                <span>{nerd ? 'Verdadeiro' : 'Falso'} </span>
+            </div>
+            <IndiretaFilho quandoClicar={fornecerInformacoes}></IndiretaFilho>
+        </Fragment>
+    )
+}
+
+* Campos HTML como <input>, <textarea> e <select>, ao serem criados como componentes React, de inicio não vamos conseguir alterar os valores na interface, pois o caminho de alteração dos estados é unidirecional, ou seja, o estado altera a interface gráfica, não o contrário.
+
+Ex:
+
+ -> Em Inputs.jsx:
+import React, { useState } from 'react'
+import './Inputs.css'
+
+export default (props) => {
+
+    const [valor, setValor] = useState('Inicial');
+    
+    function quandoMudar(e) {
+        setValor(e.target.value) {/* Aqui indicamos para mudar o valor */}
+    }
+
+    return (
+        <div className="Inputs">
+            <h2>{valor}</h2>
+            <div style ={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                <input value={valor} onChange={quandoMudar} />
+                <input value={valor} readOnly />
+                <input value={undefined} />
+            </div>
+        </div>
+    )
+}
+
+* Todos os componentes que usamos, foram baseados em funções, porem, o React permite a construção de componentes baseados em classes, que possui poucas diferenças para os componentes funcionais, possui algums metodos de ciclos de vida a mais, porem, com os hooks, com os componentes funcionais poderemos lidar com quase todos os cenários envolvendo ciclos de vida.
+
+* Trabalhando com um componente baseado em classe, para alterar o estado desse componente com o this.setState, precisamos indicar para onde o this apontar, pois na chamada da função em <button onClick={this.incrementar}>Incrementar</button>, o this não aponta para o objeto atual, para isso, temos algumas soluções:
+
+1ª:
+constructor(props){
+   super(props)
+   this.incrementar = this.incrementar.bind(this)
+}
+
+2ª: Transformar a função em uma função arrow, que sempre vai apontar o this para o objeto atual
+incrementar = () => {
+   this.setState({
+      numero: this.state.numero + 1
+        })
+    }
+
+3ª: Usar uma função arrow na chamada da função
+<button onClick={e => this.incrementar()}>Incrementar</button>
+
+* Podemos dividir nosso contador em tres componentes, Display, PassoForm e Botoes, para isso, será necessário fazer uso da comunicação entre o componente pai (Contador) e os componentes filhos (Display, PassoForm e Botoes).
+
+Ex:
+
+ -> Em Display.jsx:
+import React from 'react'
+
+export default props => {
+    return (
+        <h3><strong>{props.numero}</strong></h3>
+    )
+}
+
+ -> Em Botoes.jsx:
+import React from 'react'
+
+export default props => {
+    return (
+        <div>
+            <button onClick={props.setInc}>+</button>
+            <button onClick={props.setDec}>-</button>
+        </div>
+    )
+}
+
+ -> Em PassoForm.jsx:
+import React from 'react'
+
+export default (props) => {
+    return (
+        <div>
+            <label htmlFor="passoInput">Passo: </label>
+            <input
+                id="PassoInput"
+                type="number"
+                value={props.passo}
+                onChange={e => props.setPasso(+e.target.value)}
+            />
+        </div>
+    )
+}
+
+ -> Em Contador.jsx:
+import React, { Component, useState } from 'react'
+import "./Contador.css"
+import Display from './Display'
+import PassoForm from './PassoForm'
+import Botoes from './Botoes'
+
+export default class Contador extends Component {
+
+    //1ª Forma de inicializar o estado
+    state = {
+        numero: this.props.numeroInicial || 0, //Inicializando o valor
+        passo: this.props.passoInicial || 1
+    }
+
+    /*2ª Forma de inicializar o estado
+    constructor(props){
+        super(props)
+        this.state = {
+            numero: this.props.numeroInicial
+        }
+    }
+    */
+
+    incrementar = () => {
+        this.setState({
+            numero: this.state.numero + this.state.passo
+        })
+    }
+
+    decrementar = () => {
+        this.setState({
+            numero: this.state.numero - this.state.passo
+        })
+    }
+
+    setPasso = (novoPasso) => {
+        this.setState({
+            passo: novoPasso,
+        })
+    }
+
+    render() {
+        return (
+            <div className="Contador">
+                <h2>Contador</h2>
+                <Display numero={this.state.numero}></Display>
+                <PassoForm passo={this.state.passo} setPasso={this.setPasso}></PassoForm>
+                <Botoes setInc={this.incrementar} setDec={this.decrementar} ></Botoes>
+            </div>
+        )
+    }
+}
+
+Aqui, entre PassoForm e Contador, temos os dois tipos de comunicação, direta e indireta. A direta, ocorre quando passamos o parâmetro passo do componente filho (PassoForm) para o componente pai (Contador), isso via props. A comunicação indireta, ocorre ao passar uma função ao componente filho (setPasso={this.setPasso}), e quando o evento acontece o filho manda de volta a informação do novo passo (+e.target.value)
+
+
+* Como boa prática de desenvolvimento, podemos criar uma pasta de views e outra de components, em views iremos colocar componentes que representa telas inteiras e em components, componentes que representam partes de uma tela.
+
+* O componente Link de navegação gera uma tag a
