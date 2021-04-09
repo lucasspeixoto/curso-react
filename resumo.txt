@@ -740,5 +740,11 @@ export default _ => {
 }
 
 
+* Componentes controlados são componentes que só atualizam se houver uma alteração do estado do componente (backend), ou seja, não ha alteração via usuário, para refleter a sensação de atualização, é necessário receber essa alteração do usuário, para então, passar isso para o estado, alterar o estado, o que vai refletir no elemento visual.
+Essa alteração do estado é realizada capturando um evento.
+Podemos deixar um compontent (input, textarea e select) não controlado, atribuindo null para o parâmetro value.
 
+* UseEffect, é um hooks, que permite executar efeitos colaterais em componentes funcionais, ou seja, caso ocorra alteração de um componente, isso reflita em outro.
+
+* Não podemos chamar um função de alteração de componente dentro do corpo da funcão do componente, pois essa chamada vai alterar o estado, e esse corpo da função, é responsável por renderizar o componente, se chamar essa alteração direto no corpo, isso vai alterar o estado, o que vai renderizar o componente, e novamente alterar o estado e renderizar, e assim por diante, infinitamente, gerando um erro.
 
