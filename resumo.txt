@@ -648,10 +648,16 @@ export default class Contador extends Component {
     }
 }
 
-Aqui, entre PassoForm e Contador, temos os dois tipos de comunicação, direta e indireta. A direta, ocorre quando passamos o parâmetro passo do componente filho (PassoForm) para o componente pai (Contador), isso via props. A comunicação indireta, ocorre ao passar uma função ao componente filho (setPasso={this.setPasso}), e quando o evento acontece o filho manda de volta a informação do novo passo (+e.target.value)
+Aqui, entre PassoForm e Contador, temos os dois tipos de comunicação, direta e indireta. 
+A direta, ocorre quando passamos o parâmetro passo do componente filho (PassoForm) para o 
+componente pai (Contador), isso via props. A comunicação indireta, ocorre ao passar uma 
+função ao componente filho (setPasso={this.setPasso}), e quando o evento acontece o filho 
+manda de volta a informação do novo passo (+e.target.value)
 
 
-* Como boa prática de desenvolvimento, podemos criar uma pasta de views e outra de components, em views iremos colocar componentes que representa telas inteiras e em components, componentes que representam partes de uma tela.
+* Como boa prática de desenvolvimento, podemos criar uma pasta de views e outra de 
+components, em views iremos colocar componentes que representa telas inteiras e em components, 
+componentes que representam partes de uma tela.
 
 * O componente Link de navegação gera uma tag a
 
@@ -747,4 +753,498 @@ Podemos deixar um compontent (input, textarea e select) não controlado, atribui
 * UseEffect, é um hooks, que permite executar efeitos colaterais em componentes funcionais, ou seja, caso ocorra alteração de um componente, isso reflita em outro.
 
 * Não podemos chamar um função de alteração de componente dentro do corpo da funcão do componente, pois essa chamada vai alterar o estado, e esse corpo da função, é responsável por renderizar o componente, se chamar essa alteração direto no corpo, isso vai alterar o estado, o que vai renderizar o componente, e novamente alterar o estado e renderizar, e assim por diante, infinitamente, gerando um erro.
+Para resolver isso, podemos usar o useEffect, que vai receber dois parâmetros, o primeiro, uma função callback, que vai ser a função chamada quando determinado valor ser alterado, e o segundo parâmetro, um array de dependencias, ou seja, de valores que alterados vão chamar essa função callback.
 
+* useRef é um hooks que retorna um objeto mutável com a propriedade .current. o useRef vai retornar a referência de um objeto, sempre a mesma referência. E dentro desse objeto, conseguimos ter o estado atual através da propriedade current. Sempre que o objeto for renderizado, vamos ter acesso a esse objeto com a mesma referência. Quando o current de useRef é alterado, não ha necessidade de renderizar novamente o componente.
+Resumindo, o useRef vai criar um objeto mutável, no sentido que os atributos internos podem ser alterados, enquanto os atributos forem renderizados, estaremos com o mesmo objeto, se sair da tela e voltar, recebemos um novo objeto, mas enquando tiver renderizando, ele vai retornar a mesma referencia.
+Diferente do useState, onde toda modificação de estado, o componente é renderizado novamente.
+
+* Com useRef, podemos obter a referência de um determinado elemento interno de nosso componente, basta atribuir o valor dentro do parâmetro ref do elemento
+Ex:
+export default (props) => {
+
+    const [value1, setValue1] = useState()
+    const [value2, setValue2] = useState()
+    const count = useRef(0)
+
+    const myInput1 = useRef(null)
+    const myInput2 = useRef(null)
+
+    console.log(myInput1.current)
+
+    useEffect(() => {
+        count.current = count.current + 1 /* Não entra em renderização infinita, pois alteração
+        do valor atual de useRef, não renderiza novamente o componente */
+
+        //Colocando dentro de useEffect, só chamaremos o incremento quando value1 for alterado
+    }, [value1, value2])
+
+    return (
+        <div className="UseRef">
+            <PageTitle
+                title="Hook UseRef"
+                subtitle="Retorna um objeto mutável com a propriedade .current!"
+            />
+            <SectionTitle title="Exercício #01"></SectionTitle>
+            <div className="center">
+                <div>
+                    <span className="text">Valor: </span>
+                    <span className="text">{value1} [</span>
+                    <span className="text red">{count.current}</span>
+                    <span className="text">]</span>
+                </div>
+                <input type="text" className="input"
+                    ref={myInput1}
+                    value={value1} onChange={e => setValue1(e.target.value)}
+                />
+            </div>
+        </div>
+
+    )
+}
+
+myInput1 é nosso objeto, e o valor atual agora, é o elemento input, ja que passamos o valor para o parâmetro ref (ref={myInput1})
+Em resumo, a referência para current, agora é o elemento input.
+
+Em resumo, as Refs do React servem para acessar elementos nativos como inputs do HTML de uma forma imperativa e realizar ações dentro
+desses componentes.
+
+Programação Imperativa x Programação Declarativa:
+    O React usa uma programação declarativa, ou seja, ele adapta o seu comportamento
+ baseado no estado que ele tem, ou seja, utiliza do estado dos componentes para montar
+ a interface (Ex: Dependendo do número de notificações vai mostrar uma mensagem). 
+ A programação imperativa, vamos executar operações diretamente no HTML (dar focus, em inputs,
+ pegar valores de inputs). Normalmente, com useState, vamos esperar um evento no input, para daí,
+ pegar o valor. Com useRef, podemos pegar a informação do componente sem necessidade da renderização
+ do componente.
+
+    As vezes nosso componente é muito grande, o que não fica legal, renderizar sempre esse componente
+todas as vezes que o input alterar o estado. Com as refs podemos anotar valores sem a necessidade de 
+renderizar o componente novamente. Se for necessário, alterar a cor de um botão, por exemplo, quando
+um estado muda, ai precisamos usar o useState em vez de useRef.
+
+    Usando um componente input setado com uma ref, a atualização do input, não altera o estado, igual
+ao useState, para obter o valor atual, precisamos utilizar o metodo current do objeto criado com a ref.
+
+* o useMemo, vai auxliar para retornar valores de cache de memória.
+Se uma operação envolvendo dois input's, por exemplo, for uma operação lenta, a renderização
+dessa atualização vai demorar um pouco, o que vai impactar na renderização de outros inputs, o que
+não é legal, para resolver isso, temos duas formas:
+    1ª useEffect + useState:
+        const [result, setResult] = useState(0)
+        useEffect(function () {
+            setResult(sum(n1, n2))
+        }, [n1, n2]); 
+
+        Aqui, o resultado só vai ser chamado quando n1 e n2 forem alterados, podemos alterar outros valores
+        tranquilamente que não haverá impacto na renderização
+    2ª useMemo:
+        const result = useMemo(() => sum(n1, n2), [n1, n2])
+        useMemo retorna o valor ja calculado, e só chama a soma, se o valor de n1 ou n2 mude, ou seja,
+        é calculado um valor (uma função que demora), ele armazena um cache do valor, e só chama a função
+        novamente caso os valores (dependencias) modifiquem.
+    Forma que da problema:
+    const result = sum(n1, n2) 
+    Aqui a função lenta (sum) é chamada sempre que ha renderização ou seja, quando qualquer elemento com estado alterar
+
+* useCallback vai retornar para nós uma função 'cacheada', ou seja, uma função memoizada.
+    Ex Sem useCallback:
+     -> em UseCallback.jsx:
+        import React, { useState } from 'react'
+        import PageTitle from '../../components/layout/PageTitle'
+        import UseCallbackButtons from './UseCallbackButtons'
+
+        const UseCallback = (props) => {
+
+        const [value, setValue] = useState(0)
+
+        function inc(delta) {
+            if (delta === 0) {
+            setValue(0)
+            } else {
+            setValue(value + delta)
+            }
+        }
+
+        return (
+            <div className="UseCallback">
+            <PageTitle
+                title="Hook UseCallback"
+                subtitle="Retorna uma função memoizada!"
+            />
+            <div className="center">
+                <span className="text">{value}</span>
+                <UseCallbackButtons incFunc={inc}></UseCallbackButtons>
+            </div>
+            </div>
+        )
+        }
+
+        export default UseCallback
+
+    -> Em UseCallbackButtons.jsx:
+        import React from 'react';
+        const UseCallbackButtons = props => {
+        console.log('render...')
+        return (
+            <div>
+            <button className="btn" onClick={() => props.incFunc(6)}>+6</button>
+            <button className="btn" onClick={() => props.incFunc(12)}>+12</button>
+            <button className="btn" onClick={() => props.incFunc(18)}>+18</button>
+            <button className="btn" onClick={() => props.incFunc(0)}>Resetar</button>
+            </div>
+        );
+        }
+
+        export default UseCallbackButtons;
+
+    Aqui, toda vez que clicamos em algun dos botões, nos atualizamos um elemento dos componentes filho, no caso o
+    nosso span, porem, ao fazer isso, outro componente filho, o <UseCallbackButtons> tambem é renderizado, pois
+    o componente pai precisa ser renderizado, renderizando todos os filhos, porem, o componente <UseCallbackButtons>
+    não precisa ser renderizado, ja que não houve nenhuma alteração de estado nos elementos desse componente e isso
+    pode ser feito com o useCallback.
+        
+    Ao exportar com React.memo(), o <UseCallbackButtons> só vai ser renderizado quando alguma das props
+    desse componente for atualizada, ou seja, se tivermos passando um novo número ou uma nova função.
+    Nesse exemplo, isso acontece, pois, todas as vezes que renderizados o componente pai, a função inc()
+    é definida novamente, ou seja, uma 'nova' função, renderizando os botões. Para resolver isso, temos 
+    que colocar a função para fora do componente, o que não funciona, ja que essa função usa o setCount,
+    que é definido dentro do componente. A solução aqui, é usar o useCallback. Onde vamos definir essa função 
+    uma única vez, e só alterar.
+
+    Ex: 
+        -> Em useCallback.jsx:
+            import React, { useCallback, useState } from 'react'
+            import PageTitle from '../../components/layout/PageTitle'
+            import UseCallbackButtons from './UseCallbackButtons'
+
+            const UseCallback = (props) => {
+
+            const [value, setValue] = useState(0)
+
+            const inc = useCallback(function (delta) {
+                if (delta === 0) {
+                setValue(0)
+                } else {
+                setValue(curr => curr + delta)
+                }
+            }, [setValue])
+
+            return (
+                <div className="UseCallback">
+                <PageTitle
+                    title="Hook UseCallback"
+                    subtitle="Retorna uma função memoizada!"
+                />
+                <div className="center">
+                    <span className="text">{value}</span>
+                    <UseCallbackButtons incFunc={inc}></UseCallbackButtons>
+                </div>
+                </div>
+            )
+            }
+
+            export default UseCallback
+
+        -> Em UseCallbackButtons.jsx:
+            import React from 'react';
+
+            const UseCallbackButtons = props => {
+            console.log('render...')
+            return (
+                <div>
+                <button className="btn" onClick={() => props.incFunc(6)}>+6</button>
+                <button className="btn" onClick={() => props.incFunc(12)}>+12</button>
+                <button className="btn" onClick={() => props.incFunc(18)}>+18</button>
+                <button className="btn" onClick={() => props.incFunc(0)}>Resetar</button>
+                </div>
+            );
+            }
+
+            export default React.memo(UseCallbackButtons);
+
+        Aqui, a nossa função inc, será criada agora uma unica vez, e só vai alterar se depêndencia
+        alterar, no caso passamos setValue como depêndencia, e o setValue é definido uma única vez.
+        Dessa forma, ao exportar nosso button com React.memo() criamos um cache dos parâmetros que 
+        são passados, no caso, apenas a funçao inc, e esse componente só vai renderizar uma única
+        vez, pois a função que passamos (incFunc={inc}) se essa função
+        alterar, ou seja, não vai, pois setValue é constante. Em resumo, vamos passar sempre a mesma
+        função, sem a necessidade de ficar criando novas, pois o React.memo() armazenou em cache.
+
+        O useCallback deve ser usado quando temos função sendo passada, quando são apenas valores,
+        podemos usar o useMemo.
+
+* Context API, é uma API do React, que vai facilitar a comunicação entre componentes, sem a necessidade
+de envolver diversos outros componentes para isso, ela vai criar um componente fora da nossa App, que
+vai enxergar todos os componentes e armazenar informações deles, facilitando essa comunicação.
+Com isso conseguimos alterar um dado em determinado componente e refletir isso em outro componente
+mais distante. Aqui não há necessidade das comunicações direta (pai para filho) e indireta (filho para pai).
+OBS: Context API é normalmente usado com useReducer, que é uma alternativa ao useState para casos mais
+complexos.
+
+* Com context API, precisamos primeiro criar um objeto de contexto
+Ex:
+ -> Em src/data/DataContext.js:
+    import React from 'react';
+    export const data = {
+    number: 123,
+    text: "Context API"
+    }
+
+    const DataContext = React.createContext(data) //o createContext vai criar esse objeto onde vamos consumir esses dados
+
+    export default DataContext
+
+Agora precisamos sinalizar que esses dados vão ser acessíveis por todos os compoments, para isso, precisamos envolver
+nossa aplicação com DataContext.Provider.
+Ex:
+    -> Em App.jsx:
+        import './App.css'
+        import React from 'react'
+        import { BrowserRouter as Router } from 'react-router-dom'
+        import Menu from '../components/layout/Menu'
+        import Content from '../components/layout/Content'
+        import DataContext, { data } from '../data/DataContext'
+
+        const App = props => {
+        return (
+            <DataContext.Provider value={data}>
+            <div className="App">
+                <Router>
+                <Menu />
+                <Content />
+                </Router>
+            </div>
+            </DataContext.Provider>
+
+        )
+        }
+
+        export default App
+
+Um outra forma, é atrelar esses dados (data) dentro de um estado. Aqui tem que ter o cuidado, pois
+o data é um objeto, se atribuir o valor para um número por exemplo, deixa de ser um objeto.
+Ex:
+    -> Em UseContext.jsx:
+    import React, { useContext } from 'react'
+    import PageTitle from '../../components/layout/PageTitle'
+    import DataContext from '../../data/DataContext'
+
+    const UseContext = (props) => {
+
+    const {state, setState} = useContext(DataContext)
+
+    function addNumber(delta) {
+        setState({
+        ...state, //Precisamos manter os outros parâmetros aqui, caso contrário, o objeto data, passa a ser apenas o que alteramos, no caso {number: n}
+        number: state.number + delta
+        })
+    }
+
+    return (
+        <div className="UseContext">
+        <PageTitle
+            title="Hook UseContext"
+            subtitle="Aceita um objeto de contexto e retorna o valor atual do contexto!"
+        />
+        <div className="center">
+            <span className="text">{state.text}</span>
+            <span className="text">{state.number}</span>
+        </div>
+        <div>
+            <button className="btn" onClick={_ => addNumber(1)}> +1 </button>
+            <button className="btn" onClick={_ => addNumber(-1)}> -1 </button>
+        </div>
+        </div>
+    )
+    }
+
+    export default UseContext
+
+Essa forma de utilizar o context API não é muito legal, pois nosso contexto está disponível em toda
+a aplicação, o que pode causar problemas. Precisamos de uma maior encapsulamento. Faremos isso com 
+o componete Store, que vai ser responsável por controlar nosso estado, dando esse encapsulamento maior
+Onde para os filhos, vamos passar uma função para alterar os parâmetros (updateState), impossibilitando
+alguem alterar o estado de uma vez.
+Em resumo, o componente Store vai ser o responsável por gerenciar, via função (updateState)
+as alterações estado das informação de contexto (number e text), dessa forma, não passamos 
+direto a função 'setState', agora passamos uma função 'controladora' para alterar o nosso estado,
+dentro da parâmetro value do AppContext.Provider.
+
+Ex:
+    -> Em Store.jsx:
+        import React, { useState } from 'react';
+
+        const initialState = {
+        number: 123,
+        text: "Context API + Hooks"
+        }
+
+        export const AppContext = React.createContext(initialState)
+
+        const Store = props => {
+
+        const [state, setState] = useState(initialState)
+
+        function updateState(key, value) {
+            setState({
+            ...state,
+            [key]: value
+            })
+        }
+
+        return (
+            <AppContext.Provider value={{
+            number: state.number,
+            text: state.text,
+            setNumber: n => updateState("number", n),
+            setText: t => updateState("text", t),
+            }}>
+            {props.children}
+            </AppContext.Provider>
+        );
+        }
+
+        export default Store;
+
+    -> Em App.jsx:
+
+        import React, { useContext, useEffect } from 'react'
+        import PageTitle from '../../components/layout/PageTitle'
+        import SectionTitle from '../../components/layout/SectionTitle'
+        import DataContext from '../../data/DataContext'
+        import { AppContext } from '../../data/Store'
+
+        const UseContext = (props) => {
+
+        //Exercício #01
+        const { state, setState } = useContext(DataContext)
+        function addNumber(delta) {
+            setState({
+            ...state, //Precisamos manter os outros parâmetros aqui, caso contrário, o objeto data, passa a ser apenas o que alteramos, no caso {number: n}
+            number: state.number + delta
+            })
+        }
+
+        //Exercício #02
+        const { number, text, setNumber, setText } = useContext(AppContext)
+
+        useEffect(function(){
+            if(number>=140){
+            setText('Vai com calma Jovem...')
+            }
+        }, [number])
+
+        return (
+            <div className="UseContext">
+            <PageTitle
+                title="Hook UseContext"
+                subtitle="Aceita um objeto de contexto e retorna o valor atual do contexto!"
+            />
+            <SectionTitle title="Exercício #01" />
+            <div className="center">
+                <span className="text">{state.text}</span>
+                <span className="text">{state.number}</span>
+
+                <div>
+                <button className="btn" onClick={_ => addNumber(+1)}> +1 </button>
+                <button className="btn" onClick={_ => addNumber(-1)}> -1 </button>
+                </div>
+            </div>
+            <SectionTitle title="Exercício #02" />
+            <div className="center">
+                <span className="text">{text}</span>
+                <span className="text">{number}</span>
+                <div>
+                <button
+                    className="btn"
+                    onClick={_ => setNumber(number + 1)}> +1 </button>
+                <button
+                    className="btn"
+                    onClick={_ => setNumber(number - 1)}> -1 </button>
+                </div>
+            </div>
+            </div>
+        )
+        }
+
+        export default UseContext;
+
+* useReducer é uma alternativa ao useState, e nos ajuda a ter uma maior controle
+de estado, de evoluir objetos.
+
+Ex:
+    -> Em UseReducer.jsx:
+    import React, { useReducer } from 'react'
+    import PageTitle from '../../components/layout/PageTitle'
+
+    const initialState = {
+    cart: [],
+    products: [],
+    user: null,
+    number: 0
+    }
+
+    function reducer(state, action) {
+    switch (action.type) {
+        case 'numberAdd2':
+        return { ...state, number: state.number + 2 }
+        case 'login':
+        return { ...state, user: { name: action.payload } }
+        case 'vezes7':
+        return { ...state, number: state.number * 7 }
+        case 'div25':
+        return { ...state, number: state.number / 25 }
+        case 'arredondar':
+        return { ...state, number: parseFloat(state.number).toFixed(2) }
+        case 'addn':
+        return { ...state, number: state.number + parseInt(action.payload) }
+        default:
+        return state
+    }
+    }
+
+    const UseReducer = (props) => {
+
+    const [state, dispatch] = useReducer(reducer, initialState)
+
+    return (
+        <div className="UseReducer">
+        <PageTitle
+            title="Hook UseReducer"
+            subtitle="Uma outra forma de ter estado em componentes funcionais!"
+        />
+        <div className="center">
+            {state.user ?
+            <span className="text">{state.user.name}</span>
+            : <span className="text">Sem Usuário</span>}
+            <span className="text">{state.number}</span>
+            <div>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'numberAdd2' })}> + 2</button>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'login', payload: 'Lucas' })}>Logar</button>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'vezes7' })}>x7</button>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'div25' })}>/25</button>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'arredondar' })}>Inteiro</button>
+            <button
+                className="btn"
+                onClick={() => dispatch({ type: 'addn', payload: 3 })}>Add 'n'</button>
+            </div>
+        </div>
+        </div>
+    )
+    }
+
+    export default UseReducer
+
+Dependendo do tamanho do nossa App, vai ser necessário uma maior organização para alteração dos 
+estados.
