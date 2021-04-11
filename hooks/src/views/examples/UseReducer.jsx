@@ -1,7 +1,6 @@
 import React, { useReducer } from 'react'
 import PageTitle from '../../components/layout/PageTitle'
 
-
 import { initialState, reducer } from '../../store'
 import { numberAdd2, login } from '../../store/actions'
 
